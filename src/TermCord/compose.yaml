@@ -1,0 +1,7 @@
+﻿services:
+  termcord.main:
+    image: termcord.main
+    build:
+      context: .
+      dockerfile: TermCord.Main/Dockerfile
+

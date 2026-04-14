@@ -1,0 +1,96 @@
+@page "/"
+@using Discord
+@using Microsoft.JSInterop
+@using TermCord.Services.Interfaces
+@using TermCord.Ui.Components
+
+@inject IDiscordService DiscordService
+@inject IJSRuntime JS
+
+<div class="@SidebarClasses">
+    <div class="d-flex justify-content-between align-items-center sticky-header">
+        <div class="app-sidebar-title">
+            @GuildName
+        </div>
+        <div @onclick="@ToggleSideBar" class="link-button">
+            @ButtonText
+        </div>
+    </div>
+    <div class="d-flex flex-column sidebar-scroll">
+        @foreach (var channel in DiscordService.Channels.Where(x => x.ChannelType == ChannelType.Category && !IsIgnored(x)))
+        {
+            <CategoryRenderer CategoryChannel="channel.Object as ICategoryChannel"
+                              ChannelsInCategory="DiscordService.ChannelsInCategory(channel.Id)"/>
+        }
+    </div>
+</div>
+<div class="app-content d-flex flex-column">
+    <div class="sticky-header fadeout">
+        @DiscordService.SelectedChannel?.Name
+    </div>
+    <div class="content-scroll d-flex flex-column" id="scroll">
+        @foreach (var message in DiscordService.CurrentChannelMessages)
+        {
+            <MessageRenderer Message="@message"/>
+        }
+        <div id="bottom"></div>
+    </div>
+</div>
+
+<script>
+    function scrollIntoView(){
+        var element = document.getElementById("bottom");
+
+        if (element) {
+            element.scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+    }
+</script>
+
+@code {
+
+    public bool IsCollapsed
+    {
+        get;
+        set
+        {
+            field = value;
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public string SidebarClasses => $"app-sidebar d-flex flex-column {(IsCollapsed ? " sidebar-collapsed" : "")}";
+
+    private void ToggleSideBar()
+    {
+        IsCollapsed = !IsCollapsed;
+    }
+
+    private string ButtonText => IsCollapsed ? ">" : "<";
+
+    private string GuildName => IsCollapsed ? $"{DiscordService.GuildName[0]}" : DiscordService.GuildName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        DiscordService.ChannelDisplayUpdate += async(_, _) => await InvokeAsync(StateHasChanged);
+        await DiscordService.Refresh();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            DiscordService.ChannelDisplayUpdate += async (_, _) => await ScrollIntoView();
+            await ScrollIntoView();
+        }
+    }
+
+    private async Task ScrollIntoView()
+    {
+        await Task.Delay(200);
+        await JS.InvokeVoidAsync("scrollIntoView");
+    }
+
+}

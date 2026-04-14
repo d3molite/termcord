@@ -1,0 +1,22 @@
+.message-container{
+    padding: 0.25rem;
+    width: 100% !important;
+    border-bottom: 2px dashed white;
+}
+
+.message-header{
+    margin: 0.5rem 0;
+}
+
+.message-body{
+    padding-bottom: 0.5rem;
+}
+
+.attachment-image{
+    font-size: 0.2rem;
+    letter-spacing: 0.21rem;
+}
+
+.message-user{
+    border-bottom: 1px dotted white;
+}

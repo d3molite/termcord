@@ -1,0 +1,15 @@
+.category-label{
+    font-weight: 100;
+    font-size: 0.8rem;
+    padding: 0.2rem 0;
+}
+
+.divider-small{
+    border-bottom: 1px dotted white;
+    margin: 0.25rem 0;
+}
+
+.channel-selected{
+    background: #ffffff;
+    color: black;
+}

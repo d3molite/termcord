@@ -1,0 +1,83 @@
+@using System.Text
+@using Discord
+@using TermCord.Services.Interfaces
+@using TermCord.Services.Models
+
+<div class="d-flex flex-column">
+    <div class="category-label d-flex flex-row justify-content-between">
+        <div>
+            @CategoryChannel.Name
+        </div>
+        <div class="channel-button" @onclick="Toggle">
+            @ButtonText
+        </div>
+    </div>
+    @if (!IsCollapsed)
+    {
+        <div class="divider-small"></div>
+        @foreach (var channel in ChannelsInCategory)
+        {
+            <div class="@ChannelClass(channel.Id)" @onclick="() => ChangeChannel(channel.Id)">
+                @ChannelName(channel)
+            </div>
+        }
+        <div class="divider-small"></div>
+    }
+</div>
+
+
+
+
+@code {
+
+    [Parameter]
+    public required ICategoryChannel CategoryChannel { get; set; } = null!;
+
+    [Parameter]
+    public IEnumerable<Channel> ChannelsInCategory { get; set; } = [];
+
+    [Inject]
+    private IDiscordService DiscordService { get; set; } = null!;
+
+    private bool IsCollapsed { get; set; } = true;
+
+    private string ButtonText => IsCollapsed ? "v" : "<";
+
+    private string ChannelClass(ulong channelId)
+    {
+        var sb = new StringBuilder();
+
+        sb.Append("channel-button");
+
+        if (DiscordService.SelectedChannel?.Id == channelId)
+            sb.Append(" channel-selected");
+
+        return sb.ToString();
+    }
+
+    private string ChannelName(Channel item)
+    {
+        var sb = new StringBuilder();
+        sb.Append(item.HasUnreadMessages ? "* " : "  ");
+        sb.Append("# ");
+        sb.Append(item.Name);
+
+        return sb.ToString();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        DiscordService.ChannelStateUpdate += (_, _) => InvokeAsync(StateHasChanged);
+    }
+
+    private void Toggle()
+    {
+        IsCollapsed = !IsCollapsed;
+    }
+
+    private async Task ChangeChannel(ulong channelId)
+    {
+        await DiscordService.ChangeChannel(channelId);
+    }
+
+}

@@ -1,0 +1,15 @@
+﻿@using System.Reflection
+@using TermCord.Ui.Pages
+<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)"
+        AdditionalAssemblies="@_additionalAssemblies">
+    <Found Context="routeData">
+        <RouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)"/>
+        <FocusOnNavigate RouteData="routeData" Selector="h1"/>
+    </Found>
+</Router>
+
+@code{
+
+    private readonly Assembly[] _additionalAssemblies = [typeof(Home).Assembly];
+
+}
